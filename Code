@@ -1,0 +1,50 @@
+(define-struct quaternion (cc ic jc kc))
+;; A Quaternion is a (make-quaternion Num Num Num Num)
+
+;; Purpose:
+;; (quat-mult a b q1 q2) consumes two numbers a, b and two Quaternions q1, q2
+;; and produces the result of the multiplication q1 and q2
+
+;; Contracts:
+;; quat-mult: Num Num Quaternion Quaternion -> Quaternion
+;; requires: a, b both not equal to 0.
+
+;; Examples:
+(check-expect (quat-mult 0 5 (make-quaternion 1 2 3 4)
+                    (make-quaternion 5 6 7 8)) (make-quaternion 110 36 22 24))
+(check-expect (quat-mult 1 -1 (make-quaternion 2 3 4 8)
+                    (make-quaternion 2 8 9 0)) (make-quaternion -8 -50 -38 11))
+
+
+(define (quat-mult a b q1 q2)
+  
+  (make-quaternion
+    (- (+
+     (* (quaternion-cc q1) (quaternion-cc q2))
+     (* (quaternion-jc q1) (quaternion-jc q2) b)    
+     (* (quaternion-ic q1) (quaternion-ic q2) a))
+     (* (quaternion-kc q1) (quaternion-kc q2)  a b))
+    (- (+
+        (* (quaternion-cc q1) (quaternion-ic q2))
+        (* (quaternion-ic q1) (quaternion-cc q2))   
+        (* (quaternion-kc q1) (quaternion-jc q2) b))
+       (* (quaternion-jc q1) (quaternion-kc q2) b))
+    (- (+
+        (* (quaternion-cc q1) (quaternion-jc q2))
+        (* (quaternion-ic q1) (quaternion-kc q2) a)
+        (* (quaternion-jc q1) (quaternion-cc q2)))
+       (* (quaternion-kc q1) (quaternion-ic q2) a))
+    (- (+
+        (* (quaternion-cc q1) (quaternion-kc q2))
+        (* (quaternion-ic q1) (quaternion-jc q2))
+        (* (quaternion-kc q1) (quaternion-cc q2)))
+       (* (quaternion-jc q1) (quaternion-ic q2)))))
+
+
+;; Tests:
+(check-expect (quat-mult 1 5 (make-quaternion 2 0 0 0)
+                         (make-quaternion 2 8 9 0)) (make-quaternion 4 16 18 0))
+(check-expect (quat-mult 1 0 (make-quaternion 2 4 3 8)
+                         (make-quaternion 2 0 2 0)) (make-quaternion 4 8 10 24))
+(check-expect (quat-mult 2 5 (make-quaternion 2 3 9 1)
+                    (make-quaternion 5 6 7 2)) (make-quaternion 341 -28 59 -24))
